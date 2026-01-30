@@ -1,8 +1,14 @@
-# Continual Learning Skill for Claude Code
+# Continual Learning Skills Marketplace
 
-Automatically capture and curate session insights to build persistent project memory.
+A Claude Code plugin marketplace containing skills for capturing and curating session insights.
 
 📊 **[View the workflow diagram](docs/continual-learning-workflow.pptx)** - Visual overview of how the system works
+
+## Available Skills
+
+| Skill | Description |
+|-------|-------------|
+| `continual-learning` | Auto-capture session metadata and curate insights into permanent project memory |
 
 ## What It Does
 
@@ -38,13 +44,17 @@ session-end.py (hook)     /learn (skill)          CLAUDE.md
 ### Via Claude Code CLI (Recommended)
 
 ```bash
-claude skill add bryce0515/continual-learning-skill
+# Add this marketplace
+claude plugin marketplace add bryce0515/continual-learning-skill
+
+# Install the skill
+claude plugin install continual-learning
 ```
 
 ### Manual Installation
 
-1. Copy `SKILL.md` to `.claude/skills/continual-learning/SKILL.md` in your project
-2. Copy `hooks/session-end.py` to `.claude/hooks/session-end.py`
+1. Copy `continual-learning/SKILL.md` to `.claude/skills/continual-learning/SKILL.md` in your project
+2. Copy `continual-learning/hooks/session-end.py` to `.claude/hooks/session-end.py`
 3. Add hook configuration to `.claude/settings.json`:
 
 ```json
