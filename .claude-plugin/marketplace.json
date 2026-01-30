@@ -15,7 +15,7 @@
       "source": "./",
       "strict": false,
       "skills": [
-        "continual-learning"
+        "./continual-learning"
       ]
     }
   ]
