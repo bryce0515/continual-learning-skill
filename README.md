@@ -119,13 +119,6 @@ session-end.py (hook)     /learn (skill)          CLAUDE.md
    - Archive low-value sessions
    - Promote stable knowledge to `CLAUDE.md`
 
-## Cross-Platform Support
-
-The hook works on both Linux and Windows:
-- Uses `python` (not `python3`) for Windows compatibility
-- Uses relative paths instead of environment variables
-- Portable temp file handling
-
 ## Windows Setup
 
 On Windows (PowerShell), use these commands instead:
