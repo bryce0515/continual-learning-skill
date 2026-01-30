@@ -52,7 +52,11 @@ cat > .claude/settings.json << 'EOF'
   }
 }
 EOF
+```
 
+> **Important**: The `command` value must be a **string** (`"python .claude/hooks/session-end.py"`), not an array (`["python", ".claude/hooks/session-end.py"]`). Using an array format will cause a validation error.
+
+```bash
 # Create the learnings file
 cat > CLAUDE-learned.md << 'EOF'
 # Learned Knowledge
@@ -149,7 +153,11 @@ Copy-Item "$($hookDir.FullName)\continual-learning\hooks\session-end.py" -Destin
   }
 }
 '@ | Set-Content .claude\settings.json
+```
 
+> **Important**: The `command` value must be a **string** (`"python .claude/hooks/session-end.py"`), not an array (`["python", ".claude/hooks/session-end.py"]`). Using an array format will cause a validation error.
+
+```powershell
 # Create CLAUDE-learned.md
 @'
 # Learned Knowledge
