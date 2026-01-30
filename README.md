@@ -1,14 +1,85 @@
 # Continual Learning Skills Marketplace
 
-A Claude Code plugin marketplace containing skills for capturing and curating session insights.
+Automatically capture and curate session insights to build persistent project memory.
 
 📊 **[View the workflow diagram](docs/continual-learning-workflow.pptx)** - Visual overview of how the system works
 
-## Available Skills
+## Quick Start
 
-| Skill | Description |
-|-------|-------------|
-| `continual-learning` | Auto-capture session metadata and curate insights into permanent project memory |
+### 1. Add the marketplace and install the skill
+
+```bash
+claude plugin marketplace add bryce0515/continual-learning-skill
+claude plugin install continual-learning
+```
+
+### 2. Set up the hook in your project
+
+Copy these commands to set up auto-capture in your project:
+
+```bash
+# Create directories
+mkdir -p .claude/hooks
+
+# Copy the hook from the installed plugin
+cp ~/.claude/plugins/marketplaces/bryce0515-continual-learning-skill/continual-learning/hooks/session-end.py .claude/hooks/
+
+# Create the hook configuration
+cat > .claude/settings.json << 'EOF'
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ["python", ".claude/hooks/session-end.py"],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
+
+# Create the learnings file
+cat > CLAUDE-learned.md << 'EOF'
+# Learned Knowledge
+
+> Auto-captured session learnings. Review periodically and promote valuable insights to CLAUDE.md.
+>
+> **Last curated**: (not yet curated)
+
+## Recent Sessions
+
+<!-- New entries are prepended below this line -->
+
+---
+
+## Consolidated Learnings
+
+<!-- Patterns that emerge across multiple sessions -->
+
+## Archived
+
+<!-- Older learnings moved here after review -->
+EOF
+```
+
+### 3. Start using it
+
+The hook runs automatically after each session. Use these commands to manage learnings:
+
+| Command | Purpose |
+|---------|---------|
+| `/learn` | Analyze current session |
+| `/learn review` | Curate pending entries |
+| `/learn promote` | Move insights to CLAUDE.md |
+| `/learn organize` | Check CLAUDE.md structure |
+| `/learn search <topic>` | Search knowledge base |
+
+---
 
 ## What It Does
 
@@ -28,77 +99,6 @@ session-end.py (hook)     /learn (skill)          CLAUDE.md
 - **Manual curation**: `/learn` commands let you review, consolidate, and promote insights
 - **Scaling support**: `/learn organize` helps keep CLAUDE.md well-structured as knowledge grows
 
-## Commands
-
-| Command | Purpose |
-|---------|---------|
-| `/learn` | Analyze current session, extract insights |
-| `/learn review` | Curate pending stub entries |
-| `/learn promote` | Move valuable insights to CLAUDE.md |
-| `/learn consolidate` | Merge similar learnings into patterns |
-| `/learn organize` | Check CLAUDE.md structure, suggest consolidation |
-| `/learn search <topic>` | Search across both memory files |
-
-## Installation
-
-### Via Claude Code CLI (Recommended)
-
-```bash
-# Add this marketplace
-claude plugin marketplace add bryce0515/continual-learning-skill
-
-# Install the skill
-claude plugin install continual-learning
-```
-
-### Manual Installation
-
-1. Copy `continual-learning/SKILL.md` to `.claude/skills/continual-learning/SKILL.md` in your project
-2. Copy `continual-learning/hooks/session-end.py` to `.claude/hooks/session-end.py`
-3. Add hook configuration to `.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "SessionEnd": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": ["python", ".claude/hooks/session-end.py"]
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-4. Create `CLAUDE-learned.md` in your project root:
-
-```markdown
-# Learned Knowledge
-
-> Auto-captured session learnings. Review periodically and promote valuable insights to CLAUDE.md.
->
-> **Last curated**: YYYY-MM-DD
-
-## Recent Sessions
-
-<!-- New entries are prepended below this line -->
-
----
-
-## Consolidated Learnings
-
-<!-- Patterns that emerge across multiple sessions -->
-
-## Archived
-
-<!-- Older learnings moved here after review -->
-```
-
 ## How It Works
 
 1. **SessionEnd hook** runs automatically after each Claude Code session
@@ -115,6 +115,60 @@ The hook works on both Linux and Windows:
 - Uses `python` (not `python3`) for Windows compatibility
 - Uses relative paths instead of environment variables
 - Portable temp file handling
+
+## Windows Setup
+
+On Windows (PowerShell), use these commands instead:
+
+```powershell
+# Create directories
+New-Item -ItemType Directory -Force -Path .claude\hooks
+
+# Copy the hook
+Copy-Item "$env:USERPROFILE\.claude\plugins\marketplaces\bryce0515-continual-learning-skill\continual-learning\hooks\session-end.py" -Destination .claude\hooks\
+
+# Create settings.json
+@'
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ["python", ".claude/hooks/session-end.py"],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+'@ | Set-Content .claude\settings.json
+
+# Create CLAUDE-learned.md
+@'
+# Learned Knowledge
+
+> Auto-captured session learnings. Review periodically and promote valuable insights to CLAUDE.md.
+>
+> **Last curated**: (not yet curated)
+
+## Recent Sessions
+
+<!-- New entries are prepended below this line -->
+
+---
+
+## Consolidated Learnings
+
+<!-- Patterns that emerge across multiple sessions -->
+
+## Archived
+
+<!-- Older learnings moved here after review -->
+'@ | Set-Content CLAUDE-learned.md
+```
 
 ## License
 
