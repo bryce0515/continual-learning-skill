@@ -21,8 +21,8 @@ Copy these commands to set up auto-capture in your project:
 # Create directories
 mkdir -p .claude/hooks
 
-# Copy the hook from the installed plugin (uses wildcard for version hash)
-cp ~/.claude/plugins/cache/continual-learning-marketplace/continual-learning/*/continual-learning/hooks/session-end.py .claude/hooks/
+# Copy the hook from the installed plugin (gets latest version)
+cp "$(ls -td ~/.claude/plugins/cache/continual-learning-marketplace/continual-learning/*/continual-learning/hooks/session-end.py | head -1)" .claude/hooks/
 
 # Create the hook configuration
 cat > .claude/settings.json << 'EOF'
@@ -124,8 +124,9 @@ On Windows (PowerShell), use these commands instead:
 # Create directories
 New-Item -ItemType Directory -Force -Path .claude\hooks
 
-# Copy the hook (uses wildcard for version directory)
-Copy-Item "$env:USERPROFILE\.claude\plugins\cache\continual-learning-marketplace\continual-learning\*\continual-learning\hooks\session-end.py" -Destination .claude\hooks\
+# Copy the hook (gets latest version)
+$hookDir = Get-ChildItem "$env:USERPROFILE\.claude\plugins\cache\continual-learning-marketplace\continual-learning" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+Copy-Item "$($hookDir.FullName)\continual-learning\hooks\session-end.py" -Destination .claude\hooks\
 
 # Create settings.json
 @'
