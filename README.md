@@ -2,6 +2,8 @@
 
 Automatically capture and curate session insights to build persistent project memory.
 
+📊 **[View the workflow diagram](docs/continual-learning-workflow.pptx)** - Visual overview of how the system works
+
 ## What It Does
 
 ```
