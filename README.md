@@ -15,6 +15,16 @@ claude plugin install continual-learning
 
 ### 2. Set up the hook in your project
 
+**Option A: Ask Claude to do it (Recommended)**
+
+After installing, just tell Claude:
+
+> Set up the continual-learning hook in this project using the README from the continual-learning-marketplace plugin.
+
+Claude will read this README and configure everything for you.
+
+**Option B: Manual setup**
+
 Copy these commands to set up auto-capture in your project:
 
 ```bash
