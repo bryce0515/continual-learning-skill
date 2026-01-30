@@ -33,7 +33,7 @@ cat > .claude/settings.json << 'EOF'
         "hooks": [
           {
             "type": "command",
-            "command": ["python", ".claude/hooks/session-end.py"],
+            "command": "python .claude/hooks/session-end.py",
             "timeout": 30
           }
         ]
@@ -136,7 +136,7 @@ Copy-Item "$env:USERPROFILE\.claude\plugins\marketplaces\bryce0515-continual-lea
         "hooks": [
           {
             "type": "command",
-            "command": ["python", ".claude/hooks/session-end.py"],
+            "command": "python .claude/hooks/session-end.py",
             "timeout": 30
           }
         ]
