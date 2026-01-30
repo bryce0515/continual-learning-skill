@@ -1,0 +1,22 @@
+{
+  "name": "continual-learning-marketplace",
+  "owner": {
+    "name": "Bryce Simmons",
+    "email": ""
+  },
+  "metadata": {
+    "description": "Skills for capturing and curating session insights into persistent project memory",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "continual-learning",
+      "description": "Auto-capture session metadata and curate insights with /learn commands",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "continual-learning"
+      ]
+    }
+  ]
+}
