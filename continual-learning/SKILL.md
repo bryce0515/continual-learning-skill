@@ -24,19 +24,7 @@ session-end.py (hook)     /learn (this skill)      CLAUDE.md
 - **Hook** (`session-end.py`): Runs automatically, creates stub entries with metadata
 - **Skill** (`/learn`): Manual deep analysis, review, and promotion
 
-## Commands
-
-Parse the user's intent from how they invoked this skill:
-
-| Invocation | Action |
-|------------|--------|
-| `/learn` | Analyze current session, extract insights |
-| `/learn review` | Review pending stub entries in CLAUDE-learned.md |
-| `/learn promote` | Move insights from CLAUDE-learned.md to CLAUDE.md |
-| `/learn consolidate` | Merge similar learnings into patterns |
-| `/learn organize` | Analyze CLAUDE.md structure, suggest consolidation |
-| `/learn search <topic>` | Search across both memory files for topic |
-| `/learn [topic]` | Focus analysis on specific topic |
+> **Before any command**: Check if `CLAUDE-learned.md` exists in the project root. If missing, run setup detection first.
 
 ## Setup Detection (One-Time Check)
 
@@ -72,6 +60,20 @@ If any are missing, guide the user through setup:
 - Its existence proves setup completed successfully
 - No need for separate "setup verified" flag
 - If user deletes CLAUDE-learned.md, re-running `/learn` will re-detect and guide them
+
+## Commands
+
+Parse the user's intent from how they invoked this skill:
+
+| Invocation | Action |
+|------------|--------|
+| `/learn` | Analyze current session, extract insights |
+| `/learn review` | Review pending stub entries in CLAUDE-learned.md |
+| `/learn promote` | Move insights from CLAUDE-learned.md to CLAUDE.md |
+| `/learn consolidate` | Merge similar learnings into patterns |
+| `/learn organize` | Analyze CLAUDE.md structure, suggest consolidation |
+| `/learn search <topic>` | Search across both memory files for topic |
+| `/learn [topic]` | Focus analysis on specific topic |
 
 ## Workflow
 
