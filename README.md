@@ -93,6 +93,28 @@ The hook runs automatically after each session. Use these commands to manage lea
 | `/learn organize` | Check CLAUDE.md structure |
 | `/learn search <topic>` | Search knowledge base |
 
+## Platform Notes
+
+| Platform | Default command | Notes |
+|----------|----------------|-------|
+| **Windows** | `python` | Works with standard Python installer |
+| **Linux** | `python3` | See options below |
+| **macOS** | `python3` | Both usually work if installed via Homebrew |
+
+### Linux Users
+
+Most Linux distributions only have `python3` by default (no `python` symlink). Choose one:
+
+**Option A**: Install the compatibility package:
+```bash
+sudo apt install python-is-python3  # Debian/Ubuntu
+```
+
+**Option B**: Change the hook command to use `python3`:
+```json
+"command": "python3 .claude/hooks/session-end.py"
+```
+
 ---
 
 ## What It Does

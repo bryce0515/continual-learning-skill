@@ -290,7 +290,7 @@ When reviewing sessions, use these patterns to efficiently analyze large transcr
 
 ### Extract user messages (understand session intent)
 ```bash
-python3 << 'EOF'
+python << 'EOF'  # Use python3 on Linux if needed
 import json
 transcript = '/path/to/transcript.jsonl'
 with open(transcript) as f:
@@ -305,7 +305,7 @@ EOF
 
 ### Extract tool usage summary
 ```bash
-python3 << 'EOF'
+python << 'EOF'  # Use python3 on Linux if needed
 import json
 from collections import Counter
 transcript = '/path/to/transcript.jsonl'
