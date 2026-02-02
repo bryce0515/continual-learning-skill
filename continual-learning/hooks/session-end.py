@@ -15,6 +15,7 @@ Exit codes:
 
 Errors are logged to stderr but don't prevent session from ending.
 """
+from __future__ import annotations
 
 import json
 import os
