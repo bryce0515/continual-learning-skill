@@ -60,23 +60,22 @@ EOF
 cat > CLAUDE-learned.md << 'EOF'
 # Learned Knowledge
 
-> Auto-captured session learnings. Review periodically and promote valuable insights to CLAUDE.md.
->
-> **Last curated**: (not yet curated)
+> Working memory for insights discovered during Claude Code sessions.
+> Entries here are candidates for promotion to CLAUDE.md.
+
+**Last curated**: (not yet curated)
 
 ## Recent Sessions
 
 <!-- New entries are prepended below this line -->
 
----
-
 ## Consolidated Learnings
 
-<!-- Patterns that emerge across multiple sessions -->
+<!-- Patterns identified across multiple sessions -->
 
 ## Archived
 
-<!-- Older learnings moved here after review -->
+<!-- Sessions reviewed but not containing promotable learnings -->
 EOF
 ```
 
@@ -171,23 +170,22 @@ Copy-Item "$($hookDir.FullName)\continual-learning\hooks\session-end.py" -Destin
 @'
 # Learned Knowledge
 
-> Auto-captured session learnings. Review periodically and promote valuable insights to CLAUDE.md.
->
-> **Last curated**: (not yet curated)
+> Working memory for insights discovered during Claude Code sessions.
+> Entries here are candidates for promotion to CLAUDE.md.
+
+**Last curated**: (not yet curated)
 
 ## Recent Sessions
 
 <!-- New entries are prepended below this line -->
 
----
-
 ## Consolidated Learnings
 
-<!-- Patterns that emerge across multiple sessions -->
+<!-- Patterns identified across multiple sessions -->
 
 ## Archived
 
-<!-- Older learnings moved here after review -->
+<!-- Sessions reviewed but not containing promotable learnings -->
 '@ | Set-Content CLAUDE-learned.md
 ```
 

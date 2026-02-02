@@ -424,7 +424,7 @@ cat > CLAUDE-learned.md << 'EOF'
 
 ## Recent Sessions
 
-<!-- New session entries will be added here by the SessionEnd hook -->
+<!-- New entries are prepended below this line -->
 
 ## Consolidated Learnings
 
@@ -476,7 +476,7 @@ Copy-Item $hookSource.FullName -Destination .claude\hooks\session-end.py
 
 ## Recent Sessions
 
-<!-- New session entries will be added here by the SessionEnd hook -->
+<!-- New entries are prepended below this line -->
 
 ## Consolidated Learnings
 
