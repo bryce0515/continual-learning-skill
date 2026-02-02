@@ -40,136 +40,35 @@ Parse the user's intent from how they invoked this skill:
 
 ## Workflow
 
-### 0. Setup Check (Required First Step)
+> **⛔ STOP** — Before ANY command, check: Does `CLAUDE-learned.md` exist in project root?
+> - **YES** → Continue to command routing below
+> - **NO** → Run [Setup Reference](#setup-reference) first, then return here
 
-**Before processing ANY command**, verify setup is complete:
+### Command Routing
 
-1. Check for `CLAUDE-learned.md` in project root
-2. **If exists** → Proceed to the requested command
-3. **If missing** → Run automated setup below
-
-#### Automated Setup
-
-Detect the platform and run the appropriate setup commands directly:
-
-**Step 1: Detect Platform**
-```bash
-uname -s  # Returns "Linux", "Darwin" (macOS), or fails on Windows
+```
+User invokes /learn
+       │
+       ▼
+┌──────────────────────┐
+│ CLAUDE-learned.md    │──NO──▶ Run Setup Reference ──┐
+│ exists?              │                              │
+└──────────────────────┘                              │
+       │ YES                                          │
+       ▼◀─────────────────────────────────────────────┘
+┌──────────────────────┐
+│ Parse command:       │
+│ /learn         → §1  │
+│ /learn review  → §2  │
+│ /learn promote → §3  │
+│ /learn consolidate   │
+│              → §4    │
+│ /learn organize → §5 │
+│ /learn search → §6   │
+└──────────────────────┘
 ```
 
-**Step 2: Run Setup Commands**
-
-**Linux/macOS:**
-```bash
-# Create hooks directory
-mkdir -p .claude/hooks
-
-# Copy hook script from installed plugin (most recent version)
-cp "$(ls -td ~/.claude/plugins/cache/continual-learning-marketplace/continual-learning/*/continual-learning/hooks/session-end.py | head -1)" .claude/hooks/
-
-# Create or update settings.json with hook configuration
-cat > .claude/settings.json << 'EOF'
-{
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 .claude/hooks/session-end.py",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
-  }
-}
-EOF
-
-# Create CLAUDE-learned.md with template
-cat > CLAUDE-learned.md << 'EOF'
-# Learned Knowledge
-
-> Working memory for insights discovered during Claude Code sessions.
-> Entries here are candidates for promotion to CLAUDE.md.
-
-**Last curated**: (not yet curated)
-
-## Recent Sessions
-
-<!-- New session entries will be added here by the SessionEnd hook -->
-
-## Consolidated Learnings
-
-<!-- Patterns identified across multiple sessions -->
-
-## Archived
-
-<!-- Sessions reviewed but not containing promotable learnings -->
-EOF
-```
-
-**Windows (PowerShell):**
-```powershell
-# Create hooks directory
-New-Item -ItemType Directory -Force -Path .claude\hooks
-
-# Copy hook script (find most recent version)
-$hookSource = Get-ChildItem "$env:USERPROFILE\.claude\plugins\cache\continual-learning-marketplace\continual-learning\*\continual-learning\hooks\session-end.py" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-Copy-Item $hookSource.FullName -Destination .claude\hooks\session-end.py
-
-# Create settings.json
-@'
-{
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python .claude/hooks/session-end.py",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
-  }
-}
-'@ | Set-Content -Path .claude\settings.json
-
-# Create CLAUDE-learned.md
-@'
-# Learned Knowledge
-
-> Working memory for insights discovered during Claude Code sessions.
-> Entries here are candidates for promotion to CLAUDE.md.
-
-**Last curated**: (not yet curated)
-
-## Recent Sessions
-
-<!-- New session entries will be added here by the SessionEnd hook -->
-
-## Consolidated Learnings
-
-<!-- Patterns identified across multiple sessions -->
-
-## Archived
-
-<!-- Sessions reviewed but not containing promotable learnings -->
-'@ | Set-Content -Path CLAUDE-learned.md
-```
-
-**Step 3: Verify Setup**
-
-After running setup, verify all files exist:
-- `.claude/hooks/session-end.py`
-- `.claude/settings.json`
-- `CLAUDE-learned.md`
-
-Report success to the user, then proceed with the requested command.
-
-### 1. Analyze Current Session (`/learn`)
+### §1. Analyze Current Session (`/learn`)
 
 Read the current session's transcript and extract meaningful learnings:
 
@@ -187,7 +86,7 @@ Read the current session's transcript and extract meaningful learnings:
    - `pitfall`: Mistakes to avoid, gotchas, edge cases
 4. **Update CLAUDE-learned.md**: Add structured entries under appropriate sections
 
-### 2. Review Pending Entries (`/learn review`)
+### §2. Review Pending Entries (`/learn review`)
 
 Review auto-captured stub entries and upgrade them to analyzed entries:
 
@@ -204,7 +103,7 @@ Review auto-captured stub entries and upgrade them to analyzed entries:
    - Mark with ✓ REVIEWED
 5. Update "Last curated" date in CLAUDE-learned.md header
 
-### 3. Promote to CLAUDE.md (`/learn promote`)
+### §3. Promote to CLAUDE.md (`/learn promote`)
 
 1. Identify high-value learnings ready for promotion
 2. Show the user what will be added to CLAUDE.md
@@ -212,14 +111,14 @@ Review auto-captured stub entries and upgrade them to analyzed entries:
 4. Move entry from CLAUDE-learned.md to CLAUDE.md
 5. Mark as promoted in CLAUDE-learned.md
 
-### 4. Consolidate Learnings (`/learn consolidate`)
+### §4. Consolidate Learnings (`/learn consolidate`)
 
 1. Find similar or related entries across sessions
 2. Merge into a single, comprehensive entry
 3. Move to "Consolidated Learnings" section
 4. Remove duplicates
 
-### 5. Organize Memory File (`/learn organize`)
+### §5. Organize Memory File (`/learn organize`)
 
 Analyze CLAUDE.md structure and suggest improvements for scaling:
 
@@ -257,7 +156,7 @@ Approve changes? (describe which to apply)
 
 **IMPORTANT**: Do NOT auto-edit CLAUDE.md. Present suggestions and let user decide.
 
-### 6. Search Knowledge Base (`/learn search <topic>`)
+### §6. Search Knowledge Base (`/learn search <topic>`)
 
 Search across both memory files to find relevant knowledge:
 
@@ -475,3 +374,123 @@ grep -l "keyword" ~/.claude/projects/*/*.jsonl
 - **Check transcript size first**: Large transcripts (>1000 lines) need sampling
 - **Use user messages**: They reveal session intent faster than tool calls
 - **Skip promoted entries**: Already captured, don't re-analyze
+
+## Setup Reference
+
+Run these commands to initialize continual-learning for a project. Return to [Workflow](#workflow) after setup completes.
+
+### Detect Platform
+
+```bash
+uname -s  # Returns "Linux", "Darwin" (macOS), or fails on Windows
+```
+
+### Linux/macOS
+
+```bash
+# Create hooks directory
+mkdir -p .claude/hooks
+
+# Copy hook script from installed plugin (most recent version)
+cp "$(ls -td ~/.claude/plugins/cache/continual-learning-marketplace/continual-learning/*/continual-learning/hooks/session-end.py | head -1)" .claude/hooks/
+
+# Create settings.json with hook configuration
+cat > .claude/settings.json << 'EOF'
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/session-end.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
+
+# Create CLAUDE-learned.md with template
+cat > CLAUDE-learned.md << 'EOF'
+# Learned Knowledge
+
+> Working memory for insights discovered during Claude Code sessions.
+> Entries here are candidates for promotion to CLAUDE.md.
+
+**Last curated**: (not yet curated)
+
+## Recent Sessions
+
+<!-- New session entries will be added here by the SessionEnd hook -->
+
+## Consolidated Learnings
+
+<!-- Patterns identified across multiple sessions -->
+
+## Archived
+
+<!-- Sessions reviewed but not containing promotable learnings -->
+EOF
+```
+
+### Windows (PowerShell)
+
+```powershell
+# Create hooks directory
+New-Item -ItemType Directory -Force -Path .claude\hooks
+
+# Copy hook script (find most recent version)
+$hookSource = Get-ChildItem "$env:USERPROFILE\.claude\plugins\cache\continual-learning-marketplace\continual-learning\*\continual-learning\hooks\session-end.py" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+Copy-Item $hookSource.FullName -Destination .claude\hooks\session-end.py
+
+# Create settings.json
+@'
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/session-end.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
+'@ | Set-Content -Path .claude\settings.json
+
+# Create CLAUDE-learned.md
+@'
+# Learned Knowledge
+
+> Working memory for insights discovered during Claude Code sessions.
+> Entries here are candidates for promotion to CLAUDE.md.
+
+**Last curated**: (not yet curated)
+
+## Recent Sessions
+
+<!-- New session entries will be added here by the SessionEnd hook -->
+
+## Consolidated Learnings
+
+<!-- Patterns identified across multiple sessions -->
+
+## Archived
+
+<!-- Sessions reviewed but not containing promotable learnings -->
+'@ | Set-Content -Path CLAUDE-learned.md
+```
+
+### Verify Setup
+
+Confirm all files exist before returning to workflow:
+- `.claude/hooks/session-end.py`
+- `.claude/settings.json`
+- `CLAUDE-learned.md`
