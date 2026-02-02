@@ -39,8 +39,18 @@ mkdir -p .claude/hooks
 # Copy the hook from the installed plugin (gets latest version)
 cp "$(ls -td ~/.claude/plugins/cache/continual-learning-marketplace/continual-learning/*/continual-learning/hooks/session-end.py | head -1)" .claude/hooks/
 
-# Create the hook configuration
-cat > .claude/settings.json << 'EOF'
+# Detect Python 3 command (handles systems where python is v2 or v3)
+if command -v python3 &>/dev/null; then
+    PYTHON_CMD="python3"
+elif python --version 2>&1 | grep -q "Python 3"; then
+    PYTHON_CMD="python"
+else
+    echo "Error: Python 3 is required but not found" >&2
+    exit 1
+fi
+
+# Create the hook configuration with detected Python
+cat > .claude/settings.json << EOF
 {
   "hooks": {
     "SessionEnd": [
@@ -48,7 +58,7 @@ cat > .claude/settings.json << 'EOF'
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/session-end.py",
+            "command": "$PYTHON_CMD .claude/hooks/session-end.py",
             "timeout": 30
           }
         ]
@@ -59,7 +69,7 @@ cat > .claude/settings.json << 'EOF'
 EOF
 ```
 
-> **Important**: The `command` value must be a **string** (`"python3 .claude/hooks/session-end.py"`), not an array. Using an array format will cause a validation error. On Windows, use `python` instead of `python3`.
+> **Important**: The `command` value must be a **string**, not an array. Using an array format will cause a validation error.
 
 ```bash
 # Create the learnings file
@@ -99,13 +109,13 @@ The hook runs automatically after each session. Use these commands to manage lea
 
 ## Platform Notes
 
-The bash setup above uses `python3` (Linux/macOS default). The Windows setup below uses `python`.
+The bash setup above auto-detects the correct Python 3 command for your system. The Windows setup uses `python` (which is always Python 3 on Windows).
 
-| Platform | Command | Notes |
-|----------|---------|-------|
-| **Linux** | `python3` | Default in bash setup |
-| **macOS** | `python3` | Default in bash setup |
-| **Windows** | `python` | See Windows Setup below |
+| Platform | Detection | Notes |
+|----------|-----------|-------|
+| **Linux** | Auto-detects `python3` or `python` | Handles both old and new distros |
+| **macOS** | Auto-detects `python3` or `python` | Works with system or Homebrew Python |
+| **Windows** | Uses `python` | See Windows Setup below |
 
 ---
 

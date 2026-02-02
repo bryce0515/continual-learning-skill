@@ -394,8 +394,18 @@ mkdir -p .claude/hooks
 # Copy hook script from installed plugin (most recent version)
 cp "$(ls -td ~/.claude/plugins/cache/continual-learning-marketplace/continual-learning/*/continual-learning/hooks/session-end.py | head -1)" .claude/hooks/
 
-# Create settings.json with hook configuration
-cat > .claude/settings.json << 'EOF'
+# Detect Python 3 command (handles systems where python is v2 or v3)
+if command -v python3 &>/dev/null; then
+    PYTHON_CMD="python3"
+elif python --version 2>&1 | grep -q "Python 3"; then
+    PYTHON_CMD="python"
+else
+    echo "Error: Python 3 is required but not found" >&2
+    exit 1
+fi
+
+# Create settings.json with detected Python command
+cat > .claude/settings.json << EOF
 {
   "hooks": {
     "SessionEnd": [
@@ -403,7 +413,7 @@ cat > .claude/settings.json << 'EOF'
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .claude/hooks/session-end.py",
+            "command": "$PYTHON_CMD .claude/hooks/session-end.py",
             "timeout": 30
           }
         ]
