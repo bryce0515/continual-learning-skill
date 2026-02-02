@@ -6,13 +6,19 @@ Automatically capture and curate session insights to build persistent project me
 
 ## Quick Start
 
-### 1. Install the skill
+### 1. Add the marketplace
+
+```bash
+claude marketplace add https://github.com/bryce0515/continual-learning-skill
+```
+
+### 2. Install the skill
 
 ```bash
 claude plugin install continual-learning
 ```
 
-### 2. Set up the hook in your project
+### 3. Set up the hook in your project
 
 **Option A: Ask Claude to do it (Recommended)**
 
@@ -79,7 +85,7 @@ cat > CLAUDE-learned.md << 'EOF'
 EOF
 ```
 
-### 3. Start using it
+### 4. Start using it
 
 The hook runs automatically after each session. Use these commands to manage learnings:
 
