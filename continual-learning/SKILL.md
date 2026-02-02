@@ -38,6 +38,41 @@ Parse the user's intent from how they invoked this skill:
 | `/learn search <topic>` | Search across both memory files for topic |
 | `/learn [topic]` | Focus analysis on specific topic |
 
+## Setup Detection (One-Time Check)
+
+Use `CLAUDE-learned.md` as the setup-complete marker. Only run setup detection on first use.
+
+### Quick Check
+1. Look for `CLAUDE-learned.md` in project root
+2. **If exists** → Setup is complete, proceed with requested command
+3. **If missing** → Run full setup detection below
+
+### Full Setup Detection (only when CLAUDE-learned.md missing)
+
+Check these files:
+1. **`.claude/hooks/session-end.py`** - The auto-capture hook script
+2. **`.claude/settings.json`** - Hook configuration with SessionEnd entry
+
+If any are missing, guide the user through setup:
+
+1. Read the README from the installed plugin:
+   ```
+   ~/.claude/plugins/cache/continual-learning-marketplace/continual-learning/*/README.md
+   ```
+   (Use the most recent version directory)
+
+2. Ask: "Which platform are you on?"
+   - **Linux/macOS**: Show the bash setup commands from "Option B: Manual setup"
+   - **Windows**: Show the PowerShell setup commands from "Windows Setup" section
+
+3. After user runs commands, verify all three files exist before proceeding
+
+### Why This Works
+- `CLAUDE-learned.md` is created during setup (either manually or by the hook)
+- Its existence proves setup completed successfully
+- No need for separate "setup verified" flag
+- If user deletes CLAUDE-learned.md, re-running `/learn` will re-detect and guide them
+
 ## Workflow
 
 ### 1. Analyze Current Session (`/learn`)

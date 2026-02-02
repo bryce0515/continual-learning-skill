@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "continual-learning",
-      "description": "Auto-capture session metadata and curate insights with /learn commands",
+      "description": "Auto-capture session metadata with /learn commands. Run /learn after install for guided setup.",
       "source": "./",
       "strict": false,
       "skills": [
