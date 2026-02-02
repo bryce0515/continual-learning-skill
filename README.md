@@ -43,7 +43,7 @@ cat > .claude/settings.json << 'EOF'
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/session-end.py",
+            "command": "python3 .claude/hooks/session-end.py",
             "timeout": 30
           }
         ]
@@ -54,7 +54,7 @@ cat > .claude/settings.json << 'EOF'
 EOF
 ```
 
-> **Important**: The `command` value must be a **string** (`"python .claude/hooks/session-end.py"`), not an array (`["python", ".claude/hooks/session-end.py"]`). Using an array format will cause a validation error.
+> **Important**: The `command` value must be a **string** (`"python3 .claude/hooks/session-end.py"`), not an array. Using an array format will cause a validation error. On Windows, use `python` instead of `python3`.
 
 ```bash
 # Create the learnings file
@@ -95,25 +95,13 @@ The hook runs automatically after each session. Use these commands to manage lea
 
 ## Platform Notes
 
-| Platform | Default command | Notes |
-|----------|----------------|-------|
-| **Windows** | `python` | Works with standard Python installer |
-| **Linux** | `python3` | See options below |
-| **macOS** | `python3` | Both usually work if installed via Homebrew |
+The bash setup above uses `python3` (Linux/macOS default). The Windows setup below uses `python`.
 
-### Linux Users
-
-Most Linux distributions only have `python3` by default (no `python` symlink). Choose one:
-
-**Option A**: Install the compatibility package:
-```bash
-sudo apt install python-is-python3  # Debian/Ubuntu
-```
-
-**Option B**: Change the hook command to use `python3`:
-```json
-"command": "python3 .claude/hooks/session-end.py"
-```
+| Platform | Command | Notes |
+|----------|---------|-------|
+| **Linux** | `python3` | Default in bash setup |
+| **macOS** | `python3` | Default in bash setup |
+| **Windows** | `python` | See Windows Setup below |
 
 ---
 
