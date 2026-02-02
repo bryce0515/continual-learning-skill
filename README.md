@@ -9,7 +9,7 @@ Automatically capture and curate session insights to build persistent project me
 ### 1. Add the marketplace
 
 ```bash
-claude marketplace add https://github.com/bryce0515/continual-learning-skill
+claude plugin marketplace add https://github.com/bryce0515/continual-learning-skill
 ```
 
 ### 2. Install the skill
