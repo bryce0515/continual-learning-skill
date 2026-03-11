@@ -61,50 +61,6 @@ def extract_summaries_from_transcript(transcript_path: str) -> list[dict]:
     return summaries
 
 
-def extract_key_topics_from_transcript(transcript_path: str) -> list[str]:
-    """Extract key topics from assistant messages in transcript."""
-    topics = set()
-    keywords = [
-        "implement",
-        "fix",
-        "create",
-        "update",
-        "refactor",
-        "add",
-        "remove",
-        "debug",
-        "test",
-        "deploy",
-        "configure",
-        "optimize",
-        "migrate",
-    ]
-
-    try:
-        with open(transcript_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    entry = json.loads(line)
-                    # Look for assistant messages
-                    if entry.get("type") == "assistant":
-                        message = entry.get("message", {})
-                        content = message.get("content", [])
-                        for block in content:
-                            if isinstance(block, dict) and block.get("type") == "text":
-                                text = block.get("text", "").lower()
-                                for kw in keywords:
-                                    if kw in text:
-                                        topics.add(kw)
-                except json.JSONDecodeError:
-                    continue
-    except (FileNotFoundError, PermissionError, IOError):
-        pass
-
-    return list(topics)[:5]  # Limit to 5 topics
-
 
 def extract_commit_message(cmd: str) -> str:
     """Extract commit message from a git commit command."""
@@ -212,7 +168,7 @@ def format_tools_summary(tools: dict) -> str:
 
 
 def format_learned_entry(
-    session_id: str, transcript_path: str, cwd: str, summaries: list[dict], topics: list[str], tool_usage: dict | None = None
+    session_id: str, transcript_path: str, cwd: str, summaries: list[dict], tool_usage: dict | None = None
 ) -> str:
     """Format a markdown entry for CLAUDE-learned.md."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -223,15 +179,11 @@ def format_learned_entry(
         latest = summaries[-1]
         summary_text = latest.get("summary", summary_text)
 
-    # Format topics
-    topics_str = ", ".join(topics) if topics else "general work"
-
     # Build entry lines
     lines = [
         "",
         f"### {timestamp} - Session `{session_id[:8]}...`",
         "",
-        f"**Topics**: {topics_str}",
     ]
 
     # Add tool usage details if available
@@ -349,11 +301,28 @@ def main():
 
         # Extract information from transcript
         summaries = extract_summaries_from_transcript(transcript_path)
-        topics = extract_key_topics_from_transcript(transcript_path)
         tool_usage = extract_tool_usage(transcript_path)
 
+        # Skip no-op sessions (read-only, no code changes)
+        tools = tool_usage.get("tools", {})
+        has_edits = tools.get("Edit", 0) > 0 or tools.get("Write", 0) > 0
+        has_commits = len(tool_usage.get("git_commits", [])) > 0
+        if not has_edits and not has_commits:
+            log_debug(f"SKIP: No edits or commits in session {session_id[:8]}")
+            print(f"Skipping read-only session {session_id[:8]}", file=sys.stderr)
+            return 0
+
+        # Skip duplicate session IDs
+        learned_path = Path(project_dir) / "CLAUDE-learned.md"
+        if learned_path.exists():
+            existing = learned_path.read_text(encoding="utf-8")
+            if session_id[:8] in existing:
+                log_debug(f"SKIP: Duplicate session {session_id[:8]}")
+                print(f"Skipping duplicate session {session_id[:8]}", file=sys.stderr)
+                return 0
+
         # Format and write entry
-        entry = format_learned_entry(session_id, transcript_path, cwd, summaries, topics, tool_usage)
+        entry = format_learned_entry(session_id, transcript_path, cwd, summaries, tool_usage)
 
         if prepend_to_learned_file(entry, project_dir):
             print(f"Added learning entry for session {session_id[:8]}", file=sys.stderr)

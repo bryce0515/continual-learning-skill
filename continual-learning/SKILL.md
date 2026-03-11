@@ -5,7 +5,7 @@ description: Analyze sessions and manage project learnings. Captures insights, u
 
 # Continual Learning Skill
 
-You are helping the user manage project learnings from Claude Code sessions.
+Manage project learnings from Claude Code sessions.
 
 ## Architecture
 
@@ -21,12 +21,10 @@ session-end.py (hook)     /learn (this skill)      CLAUDE.md
    └─────────────────────────────────────────────────────────┘
 ```
 
-- **Hook** (`session-end.py`): Runs automatically, creates stub entries with metadata
+- **Hook** (`session-end.py`): Auto-captures stubs for sessions with code changes (skips read-only sessions and duplicate session IDs)
 - **Skill** (`/learn`): Manual deep analysis, review, and promotion
 
 ## Commands
-
-Parse the user's intent from how they invoked this skill:
 
 | Invocation | Action |
 |------------|--------|
@@ -36,168 +34,45 @@ Parse the user's intent from how they invoked this skill:
 | `/learn consolidate` | Merge similar learnings into patterns |
 | `/learn organize` | Analyze CLAUDE.md structure, suggest consolidation |
 | `/learn search <topic>` | Search across both memory files for topic |
-| `/learn [topic]` | Focus analysis on specific topic |
 
-## Workflow
+> **Setup check** — Before ANY command, verify `CLAUDE-learned.md` exists in project root.
+> If not, run [Setup Reference](#setup-reference) first.
 
-> **⛔ STOP** — Before ANY command, check: Does `CLAUDE-learned.md` exist in project root?
-> - **YES** → Continue to command routing below
-> - **NO** → Run [Setup Reference](#setup-reference) first, then return here
+## Review (`/learn review`)
 
-### Command Routing
+1. Read `CLAUDE-learned.md`, find stubs without ✓ REVIEWED marker
+2. **Auto-archive** sessions that match skip criteria (see below)
+3. For remaining stubs, read the linked transcript
+4. Upgrade valuable entries to analyzed format, mark ✓ REVIEWED
+5. Merge duplicate session IDs into single entries
+6. Update "Last curated" date
 
-```
-User invokes /learn
-       │
-       ▼
-┌──────────────────────┐
-│ CLAUDE-learned.md    │──NO──▶ Run Setup Reference ──┐
-│ exists?              │                              │
-└──────────────────────┘                              │
-       │ YES                                          │
-       ▼◀─────────────────────────────────────────────┘
-┌──────────────────────┐
-│ Parse command:       │
-│ /learn         → §1  │
-│ /learn review  → §2  │
-│ /learn promote → §3  │
-│ /learn consolidate   │
-│              → §4    │
-│ /learn organize → §5 │
-│ /learn search → §6   │
-└──────────────────────┘
-```
+### Skip Criteria — Auto-Archive These
 
-### §1. Analyze Current Session (`/learn`)
+- No commits AND no meaningful file edits (only `.md` planning files)
+- Duplicate session ID already analyzed
+- Session was exploratory/research with no code outcome
+- Cosmetic-only changes (formatting, style, comments)
 
-Read the current session's transcript and extract meaningful learnings:
+### What Gets Promoted (Pattern From History)
 
-1. **Find the transcript**: Look in `~/.claude/projects/*/` for recent JSONL files
-2. **Extract insights**: Look for:
-   - Bugs discovered and their root causes
-   - Architecture decisions made
-   - Domain knowledge revealed
-   - Useful commands or patterns
-   - Pitfalls encountered
-3. **Categorize** each insight:
-   - `architecture`: Code structure, patterns, design decisions
-   - `domain`: Project-specific business logic knowledge
-   - `workflow`: Useful processes, commands, shortcuts
-   - `pitfall`: Mistakes to avoid, gotchas, edge cases
-4. **Update CLAUDE-learned.md**: Add structured entries under appropriate sections
+Almost all promotions are **pitfalls where Claude would silently produce wrong code**. Examples:
+- Default config values that cause silent wrong behavior
+- Functions with generic fallbacks that silently use the wrong code path
+- Non-deterministic operations (e.g., unsorted glob results)
 
-### §2. Review Pending Entries (`/learn review`)
-
-Review auto-captured stub entries and upgrade them to analyzed entries:
-
-1. Read `CLAUDE-learned.md`
-2. Look at stub entries in "Recent Sessions" (those without ✓ REVIEWED marker)
-3. For each stub entry:
-   - Read the linked transcript for full context
-   - Determine if it contains valuable learnings
-   - Suggest which category it belongs to (architecture/domain/workflow/pitfall)
-   - Decide: **analyze** (upgrade to full entry), **archive** (not useful), or **skip** (needs more sessions)
-4. For entries worth keeping:
-   - Upgrade from stub format to analyzed format
-   - Add descriptive title, context, and learnings
-   - Mark with ✓ REVIEWED
-5. Update "Last curated" date in CLAUDE-learned.md header
-
-### §3. Promote to CLAUDE.md (`/learn promote`)
-
-1. Identify high-value learnings ready for promotion
-2. Show the user what will be added to CLAUDE.md
-3. Format appropriately for the existing CLAUDE.md structure
-4. Move entry from CLAUDE-learned.md to CLAUDE.md
-5. Mark as promoted in CLAUDE-learned.md
-
-### §4. Consolidate Learnings (`/learn consolidate`)
-
-1. Find similar or related entries across sessions
-2. Merge into a single, comprehensive entry
-3. Move to "Consolidated Learnings" section
-4. Remove duplicates
-
-### §5. Organize Memory File (`/learn organize`)
-
-Analyze CLAUDE.md structure and suggest improvements for scaling:
-
-1. **Parse sections**: Identify `##` headers as sections
-2. **Count entries**: Each `###` sub-header or distinct content block = 1 entry
-3. **Apply soft limits**:
-   - Sections: 6-8 entries max
-   - Entries: 15-20 lines max
-4. **Generate report** with:
-   - Section-by-section entry counts
-   - Flagged oversized entries
-   - Consolidation suggestions for similar content
-   - Extraction suggestions for large standalone topics
-5. **Wait for approval** before any edits
-
-**Report format:**
-```markdown
-## CLAUDE.md Organization Report
-
-### Section Analysis
-| Section | Entries | Status |
-|---------|---------|--------|
-| Domain Knowledge | 5 | ✓ OK |
-| Pitfalls | 9 | ⚠ Consider consolidating (limit: 8) |
-
-### Long Entries
-- "QA Status" (32 lines) → Consider splitting or moving to dedicated doc
-
-### Suggested Actions
-1. Consolidate entries about path handling (3 similar entries)
-2. Extract "Clone Project Channel Mode Script" to `docs/clone-project.md`
-
-Approve changes? (describe which to apply)
-```
-
-**IMPORTANT**: Do NOT auto-edit CLAUDE.md. Present suggestions and let user decide.
-
-### §6. Search Knowledge Base (`/learn search <topic>`)
-
-Search across both memory files to find relevant knowledge:
-
-1. Accept topic/keyword from user
-2. Search both files:
-   - CLAUDE.md (permanent knowledge)
-   - CLAUDE-learned.md (recent + consolidated learnings)
-3. Return matches with:
-   - Source file and section
-   - Matching snippet (50-100 chars context)
-   - Entry status (for CLAUDE-learned.md: reviewed/promoted/pending)
-4. Sort by relevance (exact match > partial match)
-
-**Output format:**
-```markdown
-## Search Results for "path"
-
-### CLAUDE.md
-**Domain Knowledge > Clone Project Channel Mode Script**
-> Image paths in history.jsonl can be absolute or relative...
-
-### CLAUDE-learned.md (Consolidated)
-**Pitfalls > Path normalization in history.jsonl**
-> Always normalize image paths to filename only...
-
-Found 2 matches across 2 files.
-```
+Architecture/domain details that are **discoverable by reading code** rarely get promoted. Don't over-document things the agent can find by exploring.
 
 ## Entry Formats
 
 ### Auto-Captured Stub (from session-end hook)
 
-The SessionEnd hook automatically creates stub entries with metadata extracted from the transcript:
-
 ```markdown
 ### {timestamp} - Session `{session_id}...`
 
-**Topics**: fix, implement, test
 **Files**: `file1.py`, `file2.py`, `new_file.py` (new)
 **Commits**: "feat: add feature"; "fix: bug"
-**Tools**: Edit(3), Write(1), Read(9), Bash(15), MCP(50)
+**Tools**: Edit(3), Write(1), Read(9), Bash(15)
 
 **Summary**: {auto-extracted or "Session completed (no summary available)"}
 
@@ -208,34 +83,22 @@ The SessionEnd hook automatically creates stub entries with metadata extracted f
 
 ### Analyzed Entry (after /learn review)
 
-When you analyze a stub entry with `/learn`, upgrade it to this richer format:
-
 ```markdown
 ### {timestamp} - {brief descriptive title} ✓ REVIEWED
 
-**Category**: {architecture|domain|workflow|pitfall}
+**Category**: pitfall|architecture|domain|workflow
 **Source**: Session `{session_id}`
 
-**Context**: {Why this came up - the problem being solved}
+**Context**: {1-2 sentences: what problem, why it matters}
 
 **Learnings**:
-1. {First insight}
-2. {Second insight}
-
-**Files created/modified**:
-- `filename.py` (new) - Description
-- `other_file.py` (modified) - What changed
-
-**Evidence**: {Code snippet, command, or file:line reference}
-
-**Transcript**: `{path}`
+1. {Actionable insight}
+2. {Actionable insight}
 
 ---
 ```
 
 ### Promoted Entry
-
-When promoting to CLAUDE.md, mark the original:
 
 ```markdown
 ### {timestamp} - {title} ✓ PROMOTED
@@ -244,140 +107,36 @@ When promoting to CLAUDE.md, mark the original:
 ...rest of entry...
 ```
 
-## Promotion Criteria
+## Promote (`/learn promote`)
 
-Promote to CLAUDE.md when:
-- The learning is **generally applicable** (not one-off)
-- It would **save time** in future sessions
-- It represents **stable knowledge** (won't change soon)
-- It fills a **gap** in existing CLAUDE.md
+**Promote when**: Claude would repeat a mistake without this knowledge. The pitfall is general (not one-off), stable (won't change soon), and not discoverable by reading the code.
 
-Do NOT promote:
-- Session-specific details
-- Temporary workarounds
-- Incomplete understanding
+**Don't promote**: Session-specific details, temporary workarounds, architecture/domain details that are discoverable by exploring the codebase.
 
-## Analysis Categories
+## Organize (`/learn organize`)
 
-### Architecture Insights
-- Code organization patterns
-- Module responsibilities
-- Data flow between components
-- Naming conventions discovered
-- File location patterns
+Analyze CLAUDE.md for bloat. Report section sizes, flag entries >20 lines, suggest extractions to `docs/`. **Never auto-edit** — present suggestions and wait for approval.
 
-### Domain Knowledge
-- Business rules embedded in code
-- Data format specifics
-- External system integrations
-- Configuration meanings
+Key principle: CLAUDE.md should be scannable by grep. If a section has too much detail, future sessions will miss context because it gets truncated. Extract deep details to `docs/` and leave a 1-2 line summary + link.
 
-### Workflow Patterns
-- Useful command sequences
-- Development shortcuts
-- Testing approaches
-- Debugging techniques
+## Consolidate (`/learn consolidate`)
 
-### Pitfalls to Avoid
-- Common mistakes in this codebase
-- Subtle bugs and their causes
-- Misleading code patterns
-- Performance gotchas
+Merge related entries across sessions into single entries. Move to consolidated section, remove duplicates. Prefer one entry with 3 learnings over 3 entries with 1 learning each.
 
-## Anti-Patterns
+## Search (`/learn search <topic>`)
 
-Avoid capturing:
-- Obvious information already in CLAUDE.md
-- User preferences (belongs in settings)
-- Temporary debugging notes
-- Incomplete explorations
-- Generic programming knowledge
-
-## Example Session Analysis
-
-Given a session where we fixed a bug in history.jsonl path handling:
-
-```markdown
-### 2026-01-27 14:30 - Path normalization in history.jsonl
-
-**Category**: pitfall
-**Source**: Session `797c448c`
-
-**Context**: Clone project script was failing to deduplicate records because paths in history.jsonl can be absolute or relative.
-
-**Learning**: Always normalize image paths to filename only (`Path(img_path).name`) when comparing records from history.jsonl. The file stores paths inconsistently.
-
-**Evidence**: `scripts/clone_project_channel_mode.py` lines 45-50
-
----
-```
-
-## Tools for Transcript Analysis
-
-When reviewing sessions, use these patterns to efficiently analyze large transcripts:
-
-### Extract user messages (understand session intent)
-```bash
-python << 'EOF'  # Use python3 on Linux if needed
-import json
-transcript = '/path/to/transcript.jsonl'
-with open(transcript) as f:
-    for line in f:
-        entry = json.loads(line)
-        if entry.get('type') == 'user':
-            content = entry.get('message', {}).get('content', '')
-            if isinstance(content, str) and len(content) > 10:
-                print(f"USER: {content[:150]}")
-EOF
-```
-
-### Extract tool usage summary
-```bash
-python << 'EOF'  # Use python3 on Linux if needed
-import json
-from collections import Counter
-transcript = '/path/to/transcript.jsonl'
-tools = Counter()
-with open(transcript) as f:
-    for line in f:
-        entry = json.loads(line)
-        if entry.get('type') == 'assistant':
-            for block in entry.get('message', {}).get('content', []):
-                if block.get('type') == 'tool_use':
-                    tools[block.get('name', '')] += 1
-for tool, count in tools.most_common(10):
-    print(f"{tool}: {count}")
-EOF
-```
-
-### Check transcript size before reading
-```bash
-wc -l ~/.claude/projects/*/*.jsonl | tail -10
-```
-
-### Search for specific content
-```bash
-grep -l "keyword" ~/.claude/projects/*/*.jsonl
-```
+Search both CLAUDE.md and CLAUDE-learned.md for matching content. Return source, section, and snippet.
 
 ## Interaction Style
 
-- Be concise in summaries
+- Be concise — learnings should be 1-2 sentences each
 - Ask before making changes to CLAUDE.md
-- Show diffs for significant changes
-- Preserve existing CLAUDE.md formatting
+- Archive aggressively — most sessions don't have reusable learnings
 - Update "Last curated" date when reviewing
-
-## Efficiency Tips
-
-- **Archive aggressively**: Setup/meta sessions rarely have reusable learnings
-- **Check transcript size first**: Large transcripts (>1000 lines) need sampling
-- **Use user messages**: They reveal session intent faster than tool calls
-- **Skip promoted entries**: Already captured, don't re-analyze
 
 ## Setup Reference
 
-Run these commands to initialize continual-learning for a project. Return to [Workflow](#workflow) after setup completes.
+Run these commands to initialize continual-learning for a project. Return to [Commands](#commands) after setup completes.
 
 ### Detect Platform
 
